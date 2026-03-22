@@ -33,6 +33,9 @@ fun DashboardScreen(
 ) {
     val reclaimableSize by viewModel.reclaimableSize.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
+    val similarSize by viewModel.similarSize.collectAsState()
+    val screenshotsCount by viewModel.screenshotsCount.collectAsState()
+    val chatSize by viewModel.chatSize.collectAsState()
 
     Scaffold(
         topBar = {
@@ -86,13 +89,13 @@ fun DashboardScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 item {
-                    CategoryCard("Similar Photos", "1.2 GB", onclick = { navController.navigate(Screen.SimilarPhotos.route) })
+                    CategoryCard("Similar Photos", similarSize, onclick = { navController.navigate(Screen.SimilarPhotos.route) })
                 }
                 item {
-                    CategoryCard("Screenshots", "42 items", onclick = { })
+                    CategoryCard("Screenshots", screenshotsCount, onclick = { })
                 }
                 item {
-                    CategoryCard("Chat Media", "850 MB", onclick = { })
+                    CategoryCard("Chat Media", chatSize, onclick = { })
                 }
             }
 

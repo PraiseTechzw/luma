@@ -1,5 +1,6 @@
 package app.lumalabs.luma.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +28,9 @@ fun SimilarPhotosScreen(
     navController: NavController,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
+    val clusters by viewModel.similarClusters.collectAsState()
+    val isScanning by viewModel.isScanning.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -40,21 +44,42 @@ fun SimilarPhotosScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                "Scanning in progress...",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White.copy(alpha = 0.5f)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            CircularProgressIndicator(color = PrimaryAccent)
+        if (isScanning && clusters.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    "Scanning in progress...",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                CircularProgressIndicator(color = PrimaryAccent)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                clusters.forEach { (clusterId, results) ->
+                    item(key = clusterId) {
+                        PhotoClusterCard(
+                            uris = results.map { it.photoUri },
+                            bestUri = results.find { it.isBest }?.photoUri ?: results.first().photoUri,
+                            onKeepBest = { /* Todo */ },
+                            onManualReview = { /* Todo */ }
+                        )
+                    }
+                }
+            }
         }
     }
 }

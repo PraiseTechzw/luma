@@ -23,4 +23,10 @@ interface ScanDao {
 
     @Query("SELECT SUM(sizeBytes) FROM scan_results WHERE isBest = 0 AND category = 'SIMILAR'")
     fun getTotalReclaimableSize(): Flow<Long?>
+
+    @Query("SELECT SUM(sizeBytes) FROM scan_results WHERE category = :category")
+    fun getCategoryTotalSize(category: String): Flow<Long?>
+
+    @Query("SELECT COUNT(*) FROM scan_results WHERE category = :category")
+    fun getCategoryCount(category: String): Flow<Int>
 }

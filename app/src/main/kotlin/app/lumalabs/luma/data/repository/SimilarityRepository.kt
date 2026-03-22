@@ -53,7 +53,7 @@ class SimilarityRepository @Inject constructor(
 
     private fun preprocessImage(bitmap: Bitmap): ByteBuffer {
         val imageProcessor = ImageProcessor.Builder()
-            .add(ResizeOp(224, 224, ResizeOp.Method.BILINEAR))
+            .add(ResizeOp(224, 224, ResizeOp.ResizeMethod.BILINEAR))
             .add(NormalizeOp(0f, 255f))
             .build()
         val tensorImage = TensorImage.fromBitmap(bitmap)
