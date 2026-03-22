@@ -92,10 +92,10 @@ fun DashboardScreen(
                     CategoryCard("Similar Photos", similarSize, onclick = { navController.navigate(Screen.SimilarPhotos.route) })
                 }
                 item {
-                    CategoryCard("Screenshots", screenshotsCount, onclick = { })
+                    CategoryCard("Screenshots", screenshotsCount, onclick = { navController.navigate(Screen.Screenshots.route) })
                 }
                 item {
-                    CategoryCard("Chat Media", chatSize, onclick = { })
+                    CategoryCard("Chat Media", chatSize, onclick = { navController.navigate(Screen.ChatMedia.route) })
                 }
             }
 

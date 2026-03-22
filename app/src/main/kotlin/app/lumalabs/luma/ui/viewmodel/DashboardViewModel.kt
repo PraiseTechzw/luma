@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import app.lumalabs.luma.data.local.dao.ScanDao
+import app.lumalabs.luma.data.repository.PhotoRepository
 import app.lumalabs.luma.worker.ScanWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val scanDao: ScanDao
+    private val scanDao: ScanDao,
+    private val photoRepository: PhotoRepository
 ) : ViewModel() {
 
     val reclaimableSize = scanDao.getTotalReclaimableSize()
@@ -28,6 +30,18 @@ class DashboardViewModel @Inject constructor(
     val similarClusters = scanDao.getResultsByCategory("SIMILAR")
         .map { list -> list.filter { it.clusterId != null }.groupBy { it.clusterId!! } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyMap())
+
+    fun getResultsByCategory(category: String): Flow<List<ScanResult>> = 
+        scanDao.getResultsByCategory(category)
+
+    fun trashPhotos(uris: List<android.net.Uri>, onTrashRequest: (android.app.PendingIntent) -> Unit) {
+        viewModelScope.launch {
+            if (uris.isNotEmpty()) {
+                val pendingIntent = photoRepository.createTrashRequest(uris)
+                onTrashRequest(pendingIntent)
+            }
+        }
+    }
 
     val similarSize = scanDao.getCategoryTotalSize("SIMILAR")
         .map { formatSize(it ?: 0L) }
@@ -54,14 +68,13 @@ class DashboardViewModel @Inject constructor(
         workManager.enqueueUniqueWork("scan_all", ExistingWorkPolicy.REPLACE, workRequest)
     }
 
-    fun keepBest(clusterId: String, onUrisToTrash: (List<android.net.Uri>) -> Unit) {
+    fun keepBest(clusterId: String, onTrashRequest: (android.app.PendingIntent, List<android.net.Uri>) -> Unit) {
         viewModelScope.launch {
             val clusterResults = scanDao.getCluster(clusterId)
             val urisToTrash = clusterResults.filter { !it.isBest }.map { android.net.Uri.parse(it.photoUri) }
             if (urisToTrash.isNotEmpty()) {
-                onUrisToTrash(urisToTrash)
-                // After successful intent, would delete from DB
-                // For now just assume they are gone
+                val pendingIntent = photoRepository.createTrashRequest(urisToTrash)
+                onTrashRequest(pendingIntent, urisToTrash)
             }
         }
     }

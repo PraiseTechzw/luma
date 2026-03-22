@@ -1,18 +1,25 @@
 package app.lumalabs.luma.ui.screen
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +28,8 @@ import androidx.navigation.NavController
 import app.lumalabs.luma.ui.theme.DarkSurfaceVariant
 import app.lumalabs.luma.ui.theme.PrimaryAccent
 import app.lumalabs.luma.ui.viewmodel.DashboardViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +39,18 @@ fun SimilarPhotosScreen(
 ) {
     val clusters by viewModel.similarClusters.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
+    val context = LocalContext.current
+
+    var pendingUrisToTrash by remember { mutableStateOf<List<android.net.Uri>?>(null) }
+
+    val trashLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            pendingUrisToTrash?.let { viewModel.removeResults(it) }
+            pendingUrisToTrash = null
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -61,6 +82,10 @@ fun SimilarPhotosScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 CircularProgressIndicator(color = PrimaryAccent)
             }
+        } else if (clusters.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("No similar photos found", color = Color.Gray)
+            }
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -74,7 +99,13 @@ fun SimilarPhotosScreen(
                         PhotoClusterCard(
                             uris = results.map { it.photoUri },
                             bestUri = results.find { it.isBest }?.photoUri ?: results.first().photoUri,
-                            onKeepBest = { /* Todo */ },
+                            onKeepBest = {
+                                viewModel.keepBest(clusterId) { pendingIntent, uris ->
+                                    pendingUrisToTrash = uris
+                                    val request = IntentSenderRequest.Builder(pendingIntent).build()
+                                    trashLauncher.launch(request)
+                                }
+                            },
                             onManualReview = { /* Todo */ }
                         )
                     }
@@ -92,9 +123,7 @@ fun PhotoClusterCard(
     onManualReview: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
     ) {
@@ -102,15 +131,40 @@ fun PhotoClusterCard(
             Text("${uris.size} Similar Photos", fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Photo Grid for cluster would go here
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Cluster Preview", color = Color.White.copy(alpha = 0.4f))
+                items(uris) { uri ->
+                    Box {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(uri)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.White.copy(alpha = 0.05f)),
+                            contentScale = ContentScale.Crop
+                        )
+                        if (uri == bestUri) {
+                            Surface(
+                                color = PrimaryAccent,
+                                shape = RoundedCornerShape(4.dp),
+                                modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp)
+                            ) {
+                                Text(
+                                    "BEST", 
+                                    fontSize = 10.sp, 
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

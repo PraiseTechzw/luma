@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import app.lumalabs.luma.ui.screen.DashboardScreen
+import app.lumalabs.luma.ui.screen.GenericMediaScreen
 import app.lumalabs.luma.ui.screen.OnboardingScreen
 import app.lumalabs.luma.ui.screen.SettingsScreen
 import app.lumalabs.luma.ui.screen.SimilarPhotosScreen
@@ -60,6 +61,12 @@ fun LumaNavGraph() {
             }
             composable(Screen.SimilarPhotos.route) {
                 SimilarPhotosScreen(navController = navController)
+            }
+            composable(Screen.Screenshots.route) {
+                GenericMediaScreen(title = "Screenshots", category = "SCREENSHOT", navController = navController)
+            }
+            composable(Screen.ChatMedia.route) {
+                GenericMediaScreen(title = "Chat Media", category = "CHAT", navController = navController)
             }
             composable(Screen.Settings.route) {
                 SettingsScreen(navController = navController)
