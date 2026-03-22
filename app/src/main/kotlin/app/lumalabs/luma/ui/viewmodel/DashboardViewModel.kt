@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import app.lumalabs.luma.data.local.dao.ScanDao
+import app.lumalabs.luma.data.local.entity.ScanResult
 import app.lumalabs.luma.data.repository.PhotoRepository
 import app.lumalabs.luma.worker.ScanWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -86,6 +87,8 @@ class DashboardViewModel @Inject constructor(
             }
         }
     }
+
+    fun formatSizeForDisplay(bytes: Long): String = formatSize(bytes)
 
     private fun formatSize(bytes: Long): String {
         return if (bytes > 1024 * 1024 * 1024) {

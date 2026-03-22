@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import app.lumalabs.luma.ui.theme.DarkSurfaceVariant
 import app.lumalabs.luma.ui.theme.PrimaryAccent
 import app.lumalabs.luma.ui.viewmodel.DashboardViewModel
+import app.lumalabs.luma.ui.component.LumaBackground
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
@@ -52,8 +53,10 @@ fun SimilarPhotosScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
+    LumaBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
             TopAppBar(
                 title = { Text("Similar Photos", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
@@ -111,6 +114,7 @@ fun SimilarPhotosScreen(
                     }
                 }
             }
+        }
         }
     }
 }

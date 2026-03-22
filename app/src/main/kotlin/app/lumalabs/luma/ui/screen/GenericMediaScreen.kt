@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 import app.lumalabs.luma.data.local.entity.ScanResult
 import app.lumalabs.luma.ui.theme.DarkSurfaceVariant
 import app.lumalabs.luma.ui.theme.PrimaryAccent
+import app.lumalabs.luma.ui.component.LumaBackground
 import app.lumalabs.luma.ui.viewmodel.DashboardViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -56,55 +57,58 @@ fun GenericMediaScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(title, style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    if (selectedUris.isNotEmpty()) {
-                        IconButton(onClick = {
-                            val uris = selectedUris.map { android.net.Uri.parse(it) }
-                            viewModel.trashPhotos(uris) { intent ->
-                                pendingUrisToTrash = uris
-                                trashLauncher.launch(IntentSenderRequest.Builder(intent).build())
+    LumaBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    actions = {
+                        if (selectedUris.isNotEmpty()) {
+                            IconButton(onClick = {
+                                val uris = selectedUris.map { android.net.Uri.parse(it) }
+                                viewModel.trashPhotos(uris) { intent ->
+                                    pendingUrisToTrash = uris
+                                    trashLauncher.launch(IntentSenderRequest.Builder(intent).build())
+                                }
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
                             }
-                        }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
-    ) { padding ->
-        if (results.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No items found", color = Color.Gray)
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
             }
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                items(results) { result ->
-                    val isSelected = selectedUris.contains(result.photoUri)
-                    SelectableImage(
-                        uri = result.photoUri,
-                        isSelected = isSelected,
-                        onClick = {
-                            if (isSelected) selectedUris.remove(result.photoUri)
-                            else selectedUris.add(result.photoUri)
-                        }
-                    )
+        ) { padding ->
+            if (results.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No items found", color = Color.Gray)
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    items(results) { result ->
+                        val isSelected = selectedUris.contains(result.photoUri)
+                        SelectableImage(
+                            uri = result.photoUri,
+                            isSelected = isSelected,
+                            onClick = {
+                                if (isSelected) selectedUris.remove(result.photoUri)
+                                else selectedUris.add(result.photoUri)
+                            }
+                        )
+                    }
                 }
             }
         }

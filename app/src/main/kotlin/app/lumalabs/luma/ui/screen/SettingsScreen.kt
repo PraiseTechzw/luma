@@ -15,26 +15,29 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import app.lumalabs.luma.data.repository.PreferenceRepository
 import app.lumalabs.luma.ui.theme.PrimaryAccent
+import app.lumalabs.luma.ui.component.LumaBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    preferenceRepository: PreferenceRepository = hiltViewModel() // Use a dedicated VM in real app
+    preferenceRepository: PreferenceRepository = hiltViewModel()
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Settings", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
-    ) { padding ->
+    LumaBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = { Text("Settings", style = MaterialTheme.typography.titleLarge) },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            }
+        ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,4 +84,5 @@ fun SettingsScreen(
             }
         }
     }
+}
 }
