@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.material.components)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -71,20 +72,20 @@ dependencies {
     ksp(libs.room.compiler)
 
     // WorkManager
-    implementation(libs.work.runtime-ktx)
+    implementation(libs.work.runtime.ktx)
 
     // DataStore
-    implementation(libs.datastore-preferences)
+    implementation(libs.datastore.preferences)
 
     // TFLite
-    implementation(libs.tensorflow-lite)
-    implementation(libs.tensorflow-lite-support)
+    implementation(libs.tensorflow.lite)
+    implementation(libs.tensorflow.lite.support)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test-junit4)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test-manifest)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
